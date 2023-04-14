@@ -2,6 +2,11 @@
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
 name: Java CI with Maven
+env:
+  AZURE_WEBAPP_NAME: pet-app  # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: ${{/home/runner/work/spring-framework-petclinic/spring-framework-petclinic}}  # set this to the path to your web app project
+  JAVA_VERSION: '1.17'                # set this to the node version to use
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}     # set GH repo secret with the publish profile of the web app
 
 on:
   push:
@@ -27,3 +32,9 @@ jobs:
           cache: maven
       - name: Build with Maven Wrapper
         run: ./mvnw -B package
+      - name: 'Deploy to Azure WebApp'
+        uses: azure/webapps-deploy@v2
+        with: 
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/target/*.war'  
